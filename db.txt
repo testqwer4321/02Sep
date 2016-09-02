@@ -1,0 +1,116 @@
+drop database if exists multimediadb;
+create database multimediadb;
+use multimediadb;
+
+DROP TABLE IF EXISTS users;
+CREATE TABLE IF NOT EXISTS users (
+    `id` varchar(36) NOT NULL,
+	`loginid` varchar(20) NOT NULL,
+    `name` varchar(32) NOT NULL,
+    `age` int,
+    `sex` varchar(1),
+	`role` varchar(20) NOT NULL DEFAULT 'NU',
+    `password` varchar(50) NOT NULL,
+    `class` varchar(36),
+    `portrait` varchar(128),
+    `path` varchar(128),
+    `timezone` tinyint(1) NOT NULL,
+    `language` varchar(3) NOT NULL DEFAULT 'en',
+    `enabled` tinyint(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (id)
+) ENGINE=MYISAM DEFAULT CHARSET=utf8;
+
+INSERT INTO users (id, loginid, name, age, sex, role, password, class, portrait, path, timezone, language, enabled)
+VALUES ('1', 'admin', 'admin', 18, 'M', 'SA','21232f297a57a5a743894a0e4a801fc3', 'A', 'User Admin System', '', 8, 'en', 1);
+
+DROP TABLE IF EXISTS videos;
+CREATE TABLE IF NOT EXISTS `videos` (
+    `id` varchar(36) NOT NULL,
+    `recorded` timestamp NOT NULL,
+    `length` int,
+    `device` varchar(128),
+    `creator` varchar(36),
+    `filename` varchar(128),
+    `type` varchar(32),
+    `format` varchar(32),
+    `location` varchar(128),
+    `deleted` boolean NOT NULL DEFAULT false,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `contents`;
+CREATE TABLE IF NOT EXISTS `contents` (
+  `content_id` varchar(50) NOT NULL,
+  `created` timestamp NULL DEFAULT NULL,
+  `uploaded` timestamp NULL DEFAULT NULL,
+  `description` varchar(2000) NULL DEFAULT '',
+  `updated` timestamp NULL DEFAULT NULL,
+`keyframe_status` int NULL DEFAULT NULL,
+  PRIMARY KEY (`content_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `accountscontents`;
+CREATE TABLE IF NOT EXISTS `accountscontents` (
+  `content_id` varchar(50) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `access_type` varchar(20) NOT NULL,
+  PRIMARY KEY (`content_id`,`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `document_contents`;
+CREATE TABLE `document_contents` (
+  `document_contents_id` varchar(100) NOT NULL,
+  `document_id` varchar(45) NOT NULL,
+  `content_id` varchar(50) DEFAULT NULL,
+  `created` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`document_contents_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `document`;
+CREATE TABLE `document` (
+  `document_id` varchar(100) NOT NULL,
+  `user_id` varchar(20) NOT NULL,
+  `title` varchar(100) DEFAULT NULL,
+  `description` varchar(2000) DEFAULT NULL,
+  `is_public` int(1) DEFAULT NULL,
+  `created` timestamp NULL DEFAULT NULL,
+  `updated` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`document_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Expand description, title properties of document for special characters
+ALTER TABLE document MODIFY description VARCHAR(12000);
+ALTER TABLE document MODIFY title VARCHAR(1200);
+-- Expand description properties of contents for special characters
+ALTER TABLE contents MODIFY description VARCHAR(12000);
+
+-- Convert ENGINE of table document to MYISAM for FULLTEXT SEARCH
+ALTER TABLE document ENGINE = MYISAM;
+-- Convert ENGINE of table contents to MYISAM for FULLTEXT SEARCH
+ALTER TABLE contents ENGINE = MYISAM;
+-- Convert ENGINE of table accounts to MYISAM for FULLTEXT SEARCH
+ALTER TABLE users ENGINE = MYISAM;
+-- Convert ENGINE of tabel accountscontents to MYISAM for FULLTEXT SEARCH
+ALTER TABLE accountscontents ENGINE = MYISAM;
+
+-- Add FULLTEXT SEARCH follow Title, Description for table document
+ALTER TABLE document ADD FULLTEXT(description, title);
+-- Add FULLTEXT SEARCH follow Description for table contents
+ALTER TABLE contents ADD FULLTEXT(description);
+
+-- Expand user_id to VARCHAR(256)
+ALTER TABLE document MODIFY user_id VARCHAR(256);
+-- Expand username to VARCHAR(256)
+ALTER TABLE users MODIFY loginid VARCHAR(256);
+-- Expand username to VARCHAR(256);
+ALTER TABLE accountscontents MODIFY username VARCHAR(256);
+
+-- Resize  document_content_id of document_contents to VARCHAR(50)
+ALTER TABLE document_contents MODIFY document_contents_id VARCHAR(50);
+-- Resize  document_id of document_contents to VARCHAR(50)
+ALTER TABLE document_contents MODIFY document_id VARCHAR(50);
+-- Resize  document_id of document to VARCHAR(50)
+ALTER TABLE document MODIFY document_id VARCHAR(50);
+
+
+
